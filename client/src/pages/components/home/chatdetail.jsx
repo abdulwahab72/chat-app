@@ -12,22 +12,29 @@ import { io } from "socket.io-client";
 import { Button } from "@/components/ui/button";
 const socket = io("http://localhost:5000");
 const ChatDetail = () => {
+  const [room, setRoom] = useState("room1");
+  const [socketId, setSocketId] = useState("");
   const [message, setMessage] = useState("");
   const [chat, setChat] = useState([]);
   useEffect(() => {
+    socket.emit("joinRoom", room);
+    socket.on("connect", () => {
+      setSocketId(socket.id);
+    });
     socket.on("receiveMessage", (msg) => {
       setChat((prev) => [...prev, msg]);
     });
     return () => {
       socket.off("receiveMessage");
+      socket.off("connect");
     };
-  }, []);
+  }, [room]);
   const sendMessage = () => {
     const messageData = {
       text: message,
       sender: socket.id,
     };
-    socket.emit("SendMessage", messageData);
+    socket.emit("SendMessage", { room, text: messageData });
     // setChat((prev) => [...prev, messageData]);
     setMessage("");
   };
@@ -97,14 +104,16 @@ const ChatDetail = () => {
             </div>
           </div> */}
           {chat.map((msg, i) => (
-            <p
+            <div
               key={i}
               className={`flex ${
-                msg.sender === socket.id ? "justify-start" : "justify-end"
+                msg.sender === socketId ? "justify-end" : "justify-start"
               }`}
             >
-              {msg.text}
-            </p>
+              <p className="bg-[#2a3942] px-4 py-2 rounded-xl max-w-xs">
+                {msg?.text?.text}
+              </p>
+            </div>
           ))}
         </div>
       </div>
