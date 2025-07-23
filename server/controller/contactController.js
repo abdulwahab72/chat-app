@@ -42,4 +42,55 @@ const getContact = async (req, res) => {
     });
   }
 };
-module.exports = { addContact, getContact };
+const updateContact = async (req, res) => {
+  const { id } = req.params;
+  const { name, number, email } = req.body;
+  try {
+    const contact = await Contact.findByIdAndUpdate(id);
+    if (!contact) {
+      return res.status(404).json({
+        success: false,
+        message: "Contact not found",
+      });
+    }
+    contact.name = name || contact.name;
+    contact.number = number || contact.number;
+    contact.email = email || contact.email;
+    await contact.save();
+    res.status(200).json({
+      success: true,
+      message: "Contact updated successfully",
+      data: contact,
+    });
+  } catch (e) {
+    console.log("error", e);
+    res.status(500).json({
+      success: false,
+      error: e.message,
+    });
+  }
+};
+const deleteContact = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const contact = await Contact.findByIdAndDelete(id);
+    if (!contact) {
+      return res.status(404).json({
+        success: false,
+        message: "Contact not found",
+      });
+    }
+    res.status(200).json({
+      success: true,
+      message: "Contact deleted successfully",
+      data: contact,
+    });
+  } catch (error) {
+    console.log("error", error);
+    res.status(500).json({
+      success: false,
+      error: error.message,
+    });
+  }
+};
+module.exports = { addContact, getContact, updateContact, deleteContact };

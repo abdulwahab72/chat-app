@@ -19,7 +19,7 @@ const createChat = async (req, res) => {
       isGroupChat,
       users,
       groupAdmin: isGroupChat ? loggedInUser : null,
-      latestMessage: null,
+      latestMessage: "",
     });
     const saveChat = await chat.save();
     res.status(201).json({
@@ -52,5 +52,26 @@ const getChat = async (req, res) => {
     });
   }
 };
-
-module.exports = { createChat, getChat };
+const deleteChat = async (req, res) => {
+  const { chatId } = req.params;
+  try {
+    const chat = await Chat.findByIdAndDelete(chatId);
+    if (!chatId) {
+      return res.status(404).json({
+        success: false,
+        message: "Chat not found",
+      });
+    }
+    res.status(200).json({
+      success: true,
+      message: "Chat deleted successfully",
+    });
+  } catch (error) {
+    console.log("error", error);
+    res.status(500).json({
+      success: false,
+      error: error.message,
+    });
+  }
+};
+module.exports = { createChat, getChat, deleteChat };

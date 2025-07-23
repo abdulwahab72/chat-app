@@ -22,9 +22,11 @@ const createMessage = async (req, res) => {
       path: "chat.users",
       select: "userName email",
     });
-    await Chat.findByIdAndUpdate(chatId, {
+    savedMessage = await Chat.findByIdAndUpdate(chatId, {
       latestMessage: savedMessage,
-    });
+    })
+      .populate("latestMessage")
+      .populate("latestMessage.sender", "userName email");
     res.status(201).json({
       success: true,
       message: "Message created successfully",
@@ -49,7 +51,16 @@ const getMessages = async (req, res) => {
     }
     const messages = await Message.find({ chat: chatId })
       .populate("sender", "userName email")
-      .populate("chat");
+      .populate({
+        path: "chat",
+        populate: {
+          path: "latestMessage",
+          populate: {
+            path: "sender",
+            select: "userName email",
+          },
+        },
+      });
 
     res.status(200).json({
       success: true,
@@ -64,4 +75,65 @@ const getMessages = async (req, res) => {
     });
   }
 };
-module.exports = { createMessage, getMessages };
+const updateMessage = async (req, res) => {
+  const { messageId, text } = req.body;
+  try {
+    if (!messageId || !text) {
+      return res.status(400).json({
+        success: false,
+        message: "Message ID and text are required",
+      });
+    }
+    const updatedMessage = await Message.findByIdAndUpdate(
+      messageId,
+      { text },
+      { new: true }
+    );
+    if (!updatedMessage) {
+      return res.status(404).json({
+        success: false,
+        message: "Message not found",
+      });
+    }
+    res.status(200).json({
+      success: true,
+      message: "Message updated successfully",
+      data: updatedMessage,
+    });
+  } catch (error) {
+    console.log("error", error);
+    res.status(500).json({
+      success: false,
+      error: error.message,
+    });
+  }
+};
+const deleteMessage = async (req, res) => {
+  const { messageId } = req.params;
+  try {
+    if (!messageId) {
+      res.status(400).json({
+        success: false,
+        message: "Message ID is required",
+      });
+    }
+    const deleteMessage = await Message.findByIdAndDelete(messageId);
+    if (!deleteMessage) {
+      return res.status(404).json({
+        success: false,
+        message: "Message not found",
+      });
+    }
+    res.status(200).json({
+      success: true,
+      message: "Message deleted successfully",
+    });
+  } catch (error) {
+    console.log("error", error);
+    res.status(500).json({
+      success: false,
+      error: error.message,
+    });
+  }
+};
+module.exports = { createMessage, getMessages, updateMessage, deleteMessage };
