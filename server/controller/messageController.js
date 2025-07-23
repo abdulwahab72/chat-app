@@ -38,4 +38,30 @@ const createMessage = async (req, res) => {
     });
   }
 };
-module.exports = { createMessage };
+const getMessages = async (req, res) => {
+  try {
+    const { chatId } = req.query;
+    if (!chatId) {
+      return res.status(400).json({
+        success: false,
+        message: "Chat ID is required",
+      });
+    }
+    const messages = await Message.find({ chat: chatId })
+      .populate("sender", "userName email")
+      .populate("chat");
+
+    res.status(200).json({
+      success: true,
+      messages: "Chat messages fetched successfully",
+      data: messages,
+    });
+  } catch (error) {
+    console.log("error", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch messages",
+    });
+  }
+};
+module.exports = { createMessage, getMessages };
