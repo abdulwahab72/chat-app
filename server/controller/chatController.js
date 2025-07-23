@@ -3,19 +3,22 @@ const Message = require("../model/message");
 const Chat = require("../model/chat");
 
 const createChat = async (req, res) => {
-  const { chatName, users, isGroupChat } = req.body;
-  if (!chatName || !users) {
+  const { chatName, contactEmails, isGroupChat } = req.body;
+  if (!chatName || !contactEmails || !Array.isArray(contactEmails)) {
     return res.status(400).json({
       success: false,
-      message: "Chat and Users are required",
+      message: "Chat name and Users are required",
     });
   }
   try {
+    const loggedInUser = req.user._id;
+    const usersFromContact = await User.find({ email: { $in: contactEmails } });
+    const users = [loggedInUser, ...usersFromContact.map((user) => user._id)];
     const chat = new Chat({
       chatName,
       isGroupChat,
-      users: users.map((user) => user._id),
-      groupAdmin: null,
+      users,
+      groupAdmin: isGroupChat ? loggedInUser : null,
       latestMessage: null,
     });
     const saveChat = await chat.save();
@@ -32,4 +35,22 @@ const createChat = async (req, res) => {
     });
   }
 };
-module.exports = { createChat };
+
+const getChat = async (req, res) => {
+  try {
+    const chats = await Chat.find({ users: req.user._id });
+    res.status(200).json({
+      success: true,
+      message: "Chats fetched successfully",
+      data: chats,
+    });
+  } catch (error) {
+    console.log("error", error);
+    res.status(500).json({
+      success: false,
+      message: "failed to fetch chats",
+    });
+  }
+};
+
+module.exports = { createChat, getChat };

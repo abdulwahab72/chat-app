@@ -9,6 +9,7 @@ const uuid = require("uuid");
 const authRouter = require("./routes/authRoutes");
 const contactRouter = require("./routes/contactRoutes");
 const chatRouter = require("./routes/chatRoutes");
+const messageRouter = require("./routes/messageRoutes");
 
 dotenv.config();
 
@@ -109,6 +110,7 @@ io.on("connection", (socket) => {
 app.use("/api/auth", authRouter);
 app.use("/api/contact", contactRouter);
 app.use("/api/chat", chatRouter);
+app.use("/api/message", messageRouter);
 const PORT = process.env.PORT || 5000;
 httpServer.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);

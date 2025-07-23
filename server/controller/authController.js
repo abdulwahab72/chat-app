@@ -1,6 +1,6 @@
 const bcrypt = require("bcryptjs");
 const User = require("../model/user");
-
+const jwt = require("jsonwebtoken");
 const signup = async (req, res) => {
   try {
     const { userName, email, password } = req.body;
@@ -14,15 +14,23 @@ const signup = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
     const newUser = new User({ userName, email, password: hashedPassword });
     await newUser.save();
+    const token = generateToken(newUser._id);
     res.status(201).json({
       success: true,
       message: "User created successfully.",
+      token,
+      data: {
+        id: newUser._id,
+        userName: newUser.userName,
+        email: newUser.email,
+      },
     });
   } catch (err) {
     console.log(err);
     res.status(500).json({ success: false, error: err.message });
   }
 };
+
 const login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -40,10 +48,16 @@ const login = async (req, res) => {
         message: "Invalid password",
       });
     }
+    const token = generateToken(user._id);
     res.status(200).json({
       success: true,
       message: "Login successfull",
-      user: user.userName,
+      user: {
+        id: user._id,
+        userName: user.userName,
+        email: user.email,
+      },
+      token,
     });
   } catch (e) {
     console.log("error", e);
@@ -52,5 +66,9 @@ const login = async (req, res) => {
       error: e.message,
     });
   }
+};
+
+const generateToken = (id) => {
+  return jwt.sign({ id }, process.env.JWT_SECRET_KEY);
 };
 module.exports = { signup, login };
