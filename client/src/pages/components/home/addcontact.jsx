@@ -20,14 +20,14 @@ const AddContact = ({ onClose, setIsOpen }) => {
     e.preventDefault();
     if (
       formData.name === "" ||
-      formData.email === "" ||
+      // formData.email === "" ||
       formData.contact === ""
     ) {
       setError("Please! fill all fields.");
     }
     try {
       const response = await addContact(formData);
-      setFormData({ name: "", email: "", contact: "" });
+      setFormData({ name: "", contact: "" });
       setIsOpen(false);
       console.log("response", response);
     } catch (e) {

@@ -11,6 +11,8 @@ import {
 import { io } from "socket.io-client";
 import { Button } from "@/components/ui/button";
 import { getContactById } from "@/services/contact/contact";
+import { createChat } from "@/services/chat/chat";
+import { createMessage } from "@/services/message/message";
 const socket = io("http://localhost:5000");
 const ChatDetail = ({ data }) => {
   const [room, setRoom] = useState("room1");
@@ -18,7 +20,9 @@ const ChatDetail = ({ data }) => {
   const [message, setMessage] = useState("");
   const [chat, setChat] = useState([]);
   const [contactDetail, setContactDetail] = useState({});
-  console.log("data", data);
+  const [chatData, setChatData] = useState("");
+  const user = JSON.parse(localStorage.getItem("user")) || {};
+  console.log("u", user);
   useEffect(() => {
     const fetchDetail = async () => {
       try {
@@ -41,11 +45,57 @@ const ChatDetail = ({ data }) => {
       socket.off("connect");
     };
   }, [room, data]);
-  const sendMessage = () => {
+  // useEffect(() => {
+  //   const formData = {
+  //     chatName: contactDetail?.name,
+  //     contactEmails: [user?.email, contactDetail?.email],
+  //     isGroupChat: false,
+  //   };
+  //   // const createChatFunc = async () => {
+  //   //   try {
+  //   //     const response = await createChat(formData);
+  //   //     console.log("d", response?.data);
+  //   //     return response?.data;
+  //   //   } catch (error) {
+  //   //     console.log("error", error);
+  //   //   }
+  //   // };
+  // }, [createChatFunc]);
+  const sendMessage = async () => {
     const messageData = {
       text: message,
       sender: socket.id,
     };
+
+    const formData = {
+      chatName: contactDetail?.name,
+      contactEmails: [contactDetail?.email],
+      isGroupChat: false,
+    };
+    const createChatFunc = async () => {
+      try {
+        const response = await createChat(formData);
+        console.log("d", response?.data);
+        setChatData(response?.data);
+        // console.log("as", chatData);
+        if (response?.data?._id) {
+          const msgFormData = {
+            chatId: response?.data?._id,
+            text: message,
+          };
+          try {
+            const response = await createMessage(msgFormData);
+            return response?.data;
+          } catch (error) {
+            console.log("error", error);
+          }
+        }
+        return response?.data;
+      } catch (error) {
+        console.log("error", error);
+      }
+    };
+    createChatFunc();
     socket.emit("SendMessage", { room, text: messageData });
     // setChat((prev) => [...prev, messageData]);
     setMessage("");

@@ -19,7 +19,7 @@ const createChat = async (req, res) => {
       isGroupChat,
       users,
       groupAdmin: isGroupChat ? loggedInUser : null,
-      latestMessage: "",
+      latestMessage: null,
     });
     const saveChat = await chat.save();
     res.status(201).json({

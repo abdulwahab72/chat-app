@@ -1,17 +1,27 @@
 const Contact = require("../model/contact-detail");
-
+const User = require("../model/user");
 const addContact = async (req, res) => {
   try {
-    const { name, number, email } = req.body;
-    const emailExist = await Contact.findOne({ email });
-    const numberExist = await Contact.findOne({ number });
-    if (emailExist || numberExist) {
-      return res.status(400).json({
+    const { name, number } = req.body;
+    // const emailExist = await Contact.findOne({ email });
+    const numberExist = await User.findOne({ phoneNumber: number });
+    if (!numberExist) {
+      return res.status(404).json({
         success: false,
-        message: "This contact has already exist",
+        message: "This contact has not exist",
       });
     }
-    const newContact = new Contact({ name, number, email });
+    const existingContact = await Contact.findOne({
+      number,
+      email: req.user.email,
+    });
+    if (existingContact) {
+      return res.status(400).json({
+        success: false,
+        message: "Contact already exists",
+      });
+    }
+    const newContact = new Contact({ name, number, email: req.user.email });
     await newContact.save();
     res.status(201).json({
       success: true,

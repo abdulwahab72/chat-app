@@ -6,6 +6,7 @@ export const signupUser = async (formData) => {
   try {
     const response = await axios.post(`${API_URL}/api/auth/signup`, {
       userName: formData.userName,
+      phoneNumber: formData.phoneNumber,
       email: formData.email,
       password: formData.password,
     });
@@ -23,6 +24,7 @@ export const loginUser = async (formData) => {
       password: formData.password,
     });
     localStorage.setItem("token", response?.data?.token);
+    localStorage.setItem("user", JSON.stringify(response?.data?.user));
     return response?.data;
   } catch (e) {
     console.log(e);

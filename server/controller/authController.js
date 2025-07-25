@@ -3,16 +3,25 @@ const User = require("../model/user");
 const jwt = require("jsonwebtoken");
 const signup = async (req, res) => {
   try {
-    const { userName, email, password } = req.body;
+    const { userName, phoneNumber, email, password } = req.body;
     const existingUser = await User.findOne({ email });
-    if (existingUser) {
+    const existingUserByNumber = await User.findOne({ phoneNumber });
+    if (existingUser || existingUserByNumber) {
       return res.status(400).json({
         success: false,
-        message: "Email already exists",
+        message: existingUser
+          ? "Email already exists"
+          : "Phone number already exists",
       });
     }
+
     const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = new User({ userName, email, password: hashedPassword });
+    const newUser = new User({
+      userName,
+      phoneNumber,
+      email,
+      password: hashedPassword,
+    });
     await newUser.save();
     const token = generateToken(newUser._id);
     res.status(201).json({
@@ -22,6 +31,7 @@ const signup = async (req, res) => {
       data: {
         id: newUser._id,
         userName: newUser.userName,
+        phoneNumber: newUser.phoneNumber,
         email: newUser.email,
       },
     });
@@ -55,6 +65,7 @@ const login = async (req, res) => {
       user: {
         id: user._id,
         userName: user.userName,
+        phoneNumber: user.phoneNumber,
         email: user.email,
       },
       token,

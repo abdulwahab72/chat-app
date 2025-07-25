@@ -8,7 +8,7 @@ export const addContact = async (formData) => {
       `${API_URL}/api/contact/add`,
       {
         name: formData.name,
-        email: formData.email,
+        // email: formData.email,
         number: formData.contact,
       },
       {

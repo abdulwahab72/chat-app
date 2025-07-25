@@ -9,6 +9,7 @@ import { toast } from "sonner";
 const SignupPage = () => {
   const [formData, setFormData] = useState({
     userName: "",
+    phoneNumber: "",
     email: "",
     password: "",
   });
@@ -18,6 +19,7 @@ const SignupPage = () => {
     e.preventDefault();
     if (
       formData.userName === "" &&
+      formData.phoneNumber === "" &&
       formData.email === "" &&
       formData.password === ""
     ) {
@@ -26,7 +28,7 @@ const SignupPage = () => {
     try {
       const response = await signupUser(formData);
       if (response?.success) {
-        setFormData({ userName: "", email: "", password: "" });
+        setFormData({ userName: "", phoneNumber: "", email: "", password: "" });
         toast("Signup successfully! Please login now!");
         navigate("/login");
       }
@@ -52,6 +54,16 @@ const SignupPage = () => {
                 setFormData({ ...formData, userName: e.target.value })
               }
               placeholder="Enter your user name"
+              className="outline-none w-full"
+            />
+            <Input
+              name="phoneNumber"
+              type="text"
+              value={formData.phoneNumber}
+              onChange={(e) =>
+                setFormData({ ...formData, phoneNumber: e.target.value })
+              }
+              placeholder="Enter your phone number"
               className="outline-none w-full"
             />
             <Input
