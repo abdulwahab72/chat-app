@@ -19,8 +19,15 @@ const ChatSideBar = () => {
   const [searchShow, setSearchShow] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [data, setData] = useState([]);
-  const handleOpen = () => {
-    setOpen(!open);
+  const [selectedId, setSelectedId] = useState("");
+  const handleOpen = (selectId) => {
+    if (selectId === selectedId) {
+      // setSelectedId(selectId);
+      setOpen((prev) => !prev);
+    } else {
+      setSelectedId(selectId);
+      setOpen(true);
+    }
   };
   const handleSearchShow = () => {
     setSearchShow(true);
@@ -125,7 +132,7 @@ const ChatSideBar = () => {
               data.map((item, i) => (
                 <Card
                   key={i}
-                  onClick={handleOpen}
+                  onClick={() => handleOpen(item?._id)}
                   className="bg-[#2d2d2d] p-4 rounded-xl"
                 >
                   <div className="flex items-center space-x-3">
@@ -204,7 +211,7 @@ const ChatSideBar = () => {
             </div> */}
         </div>
       </div>
-      {open && <ChatDetail />}
+      {open && <ChatDetail data={selectedId} />}
       {isOpen && (
         <AddContact onClose={() => setIsOpen(false)} setIsOpen={setIsOpen} />
       )}

@@ -9,6 +9,7 @@ export const signupUser = async (formData) => {
       email: formData.email,
       password: formData.password,
     });
+    localStorage.setItem("token", response?.data?.token);
     return response?.data;
   } catch (e) {
     console.log(e);
@@ -21,6 +22,7 @@ export const loginUser = async (formData) => {
       email: formData.email,
       password: formData.password,
     });
+    localStorage.setItem("token", response?.data?.token);
     return response?.data;
   } catch (e) {
     console.log(e);

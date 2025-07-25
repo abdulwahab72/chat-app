@@ -20,7 +20,8 @@ const LoginPage = () => {
     // }
     try {
       const response = await loginUser(formData);
-      if (response?.success) {
+      console.log("first", response);
+      if (response?.token) {
         setFormData({ email: "", password: "" });
         toast("Login Successfull!");
         navigate("/");

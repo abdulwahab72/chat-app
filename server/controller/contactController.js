@@ -42,6 +42,29 @@ const getContact = async (req, res) => {
     });
   }
 };
+const getContactById = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const contact = await Contact.findById(id);
+    if (!contact) {
+      return res.status(404).json({
+        success: false,
+        message: "Contact not found",
+      });
+    }
+    res.status(200).json({
+      success: true,
+      message: "Contact fetched successfully",
+      data: contact,
+    });
+  } catch (error) {
+    console.log("error", error);
+    res.status(500).json({
+      success: false,
+      error: error.message,
+    });
+  }
+};
 const updateContact = async (req, res) => {
   const { id } = req.params;
   const { name, number, email } = req.body;
@@ -93,4 +116,10 @@ const deleteContact = async (req, res) => {
     });
   }
 };
-module.exports = { addContact, getContact, updateContact, deleteContact };
+module.exports = {
+  addContact,
+  getContact,
+  getContactById,
+  updateContact,
+  deleteContact,
+};

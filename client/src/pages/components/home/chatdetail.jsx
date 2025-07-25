@@ -10,13 +10,25 @@ import {
 } from "lucide-react";
 import { io } from "socket.io-client";
 import { Button } from "@/components/ui/button";
+import { getContactById } from "@/services/contact/contact";
 const socket = io("http://localhost:5000");
-const ChatDetail = () => {
+const ChatDetail = ({ data }) => {
   const [room, setRoom] = useState("room1");
   const [socketId, setSocketId] = useState("");
   const [message, setMessage] = useState("");
   const [chat, setChat] = useState([]);
+  const [contactDetail, setContactDetail] = useState({});
+  console.log("data", data);
   useEffect(() => {
+    const fetchDetail = async () => {
+      try {
+        const response = await getContactById(data);
+        setContactDetail(response?.data);
+      } catch (error) {
+        console.log("error", error);
+      }
+    };
+    fetchDetail();
     socket.emit("joinRoom", room);
     socket.on("connect", () => {
       setSocketId(socket.id);
@@ -28,7 +40,7 @@ const ChatDetail = () => {
       socket.off("receiveMessage");
       socket.off("connect");
     };
-  }, [room]);
+  }, [room, data]);
   const sendMessage = () => {
     const messageData = {
       text: message,
@@ -38,6 +50,7 @@ const ChatDetail = () => {
     // setChat((prev) => [...prev, messageData]);
     setMessage("");
   };
+  console.log("da", contactDetail);
   return (
     <div className="h-screen w-full bg-[#111b21] text-white flex flex-col">
       {/* Header */}
@@ -49,7 +62,7 @@ const ChatDetail = () => {
             className="w-10 h-10 rounded-full"
           />
           <div>
-            <h2 className="font-semibold">Darshan Zalavadiya</h2>
+            <h2 className="font-semibold">{contactDetail?.name}</h2>
             <p className="text-green-400 text-sm">Online</p>
           </div>
         </div>
